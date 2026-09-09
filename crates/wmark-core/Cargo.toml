@@ -1,0 +1,15 @@
+[package]
+name = "wmark-core"
+version = "0.1.0"
+edition = "2021"
+[dependencies]
+image = { version = "0.25.10", default-features = false, features = ["jpeg", "png", "webp"] }
+resvg = { version = "0.45.1", default-features = false, features = ["text", "raster-images"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+base64 = "0.22"
+thiserror = "2"
+tempfile = "3"
+lcms2 = { version = "6", features = ["static"] }
+[dev-dependencies]
+kamadak-exif = "0.6"

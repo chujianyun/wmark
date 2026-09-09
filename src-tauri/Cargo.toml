@@ -1,0 +1,20 @@
+[package]
+name = "wmark"
+version = "0.1.0"
+edition = "2021"
+[lib]
+name = "wmark_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+[dependencies]
+tauri = { version = "2", features = ["protocol-asset"] }
+tauri-plugin-dialog = "2"
+wmark-core = { path = "../crates/wmark-core" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+base64 = "0.22"
+image = { version = "0.25.10", default-features = false, features = ["png"] }
+uuid = { version = "1", features = ["v4"] }
+open = "5"
+tempfile = "3"
