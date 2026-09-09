@@ -10,4 +10,4 @@
 
 当前范围：单张最多 4000 万像素、200 MiB，批次最多 1000 张；不支持动态图片、HEIC、RAW、PDF 或视频。WebP 输出为无损；仅 JPG 支持质量调节。RGB ICC 转换为 sRGB，非 RGB ICC 会提示转换后重试。
 
-详情与本次验证范围见仓库测试报告。
+测试报告：[完整用例与验证范围](https://github.com/chujianyun/wmark/blob/main/.spec-to-ship/desktop-v1/20260910_test-report-02.md)。发布结果：[最终发布验收记录](https://github.com/chujianyun/wmark/blob/main/docs/release-verification.md)。

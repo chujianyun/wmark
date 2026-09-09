@@ -31,4 +31,4 @@
 
 ## 当前外部依赖
 
-初次检查 gh 未登录。已请用户完成 gh auth login；开发和本地验证不依赖此项。Windows 验证通过 GitHub runner 获取，不将本地 Mac 结果当作 Windows 证据。
+Git 推送使用已认证的 SSH；Release 工作流使用 GitHub 自动提供的最小权限令牌，无需开发机 gh 登录。Windows 验证通过 GitHub runner 获取，不将本地 Mac 结果当作 Windows 证据。
