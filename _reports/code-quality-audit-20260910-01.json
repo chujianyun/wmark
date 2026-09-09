@@ -1,0 +1,380 @@
+{
+  "project": "Wmark desktop v0.1.0",
+  "risk_level": "high",
+  "scope": {
+    "description": "First-party source and local image data flow, build/config and test contracts; platform validation tracked separately",
+    "coverage_percent": 100,
+    "included": [
+      "src",
+      "src-tauri/src",
+      "crates/wmark-core",
+      "scripts",
+      ".github/workflows",
+      "manifests"
+    ],
+    "excluded": [
+      "third-party source",
+      "generated binaries",
+      "user files"
+    ]
+  },
+  "checks": {
+    "A1": {
+      "status": "pass",
+      "evidence": [
+        "docs/implementation-plan.md R01–R10; frontend gate; test report matrices"
+      ]
+    },
+    "A2": {
+      "status": "pass",
+      "evidence": [
+        "tests/App.test.tsx; acceptance.rs; installed Mac output verified pixel-exact"
+      ]
+    },
+    "A3": {
+      "status": "pass",
+      "evidence": [
+        "New repository; prototype preserved; only task code staged"
+      ]
+    },
+    "A4": {
+      "status": "pass",
+      "evidence": [
+        "Preferences schemaVersion=1; deny_unknown_fields; roundtrip and invalid-version tests"
+      ]
+    },
+    "B1": {
+      "status": "pass",
+      "evidence": [
+        "imaging.rs source-over alpha and transforms; r03_* pixel assertions"
+      ]
+    },
+    "B2": {
+      "status": "pass",
+      "evidence": [
+        "r01_large_encoded_file_rejected_before_reading; oversized dimensions; invalid parameters; duplicate import"
+      ]
+    },
+    "B3": {
+      "status": "pass",
+      "evidence": [
+        "r07_* cancellation, partial failure and retry; App retry snapshot test"
+      ]
+    },
+    "B4": {
+      "status": "pass",
+      "evidence": [
+        "Alpha defect fixed at integer compositing; exact-alpha regression retained"
+      ]
+    },
+    "C1": {
+      "status": "pass",
+      "evidence": [
+        "src-tauri/src/lib.rs authorized imported paths + permitted output directories; no remote identity service"
+      ]
+    },
+    "C2": {
+      "status": "pass",
+      "evidence": [
+        "SVG text escaped; Watermark/ExportOptions validation; fixed Tauri CSP; unknown path test"
+      ]
+    },
+    "C3": {
+      "status": "pass",
+      "evidence": [
+        "Staged textual scan found no private home paths, keys or tokens; synthetic-only screenshots"
+      ]
+    },
+    "C4": {
+      "status": "partial",
+      "evidence": [
+        "npm audit --omit=dev: 0 reported vulnerabilities; Rust dependency advisory database not exhaustively scanned"
+      ]
+    },
+    "C5": {
+      "status": "pass",
+      "evidence": [
+        "Single local webview, no server/login/session cookies; remote scripts blocked; import and job limits"
+      ]
+    },
+    "D1": {
+      "status": "pass",
+      "evidence": [
+        "NamedTempFile + persist_noclobber; atomic config persist; original bytes unchanged test"
+      ]
+    },
+    "D2": {
+      "status": "pass",
+      "evidence": [
+        "Schema validation/defaults and serialization tests; output dimensions and EXIF orientation tests"
+      ]
+    },
+    "D3": {
+      "status": "pass",
+      "evidence": [
+        "Atomic busy/cancel and core mutex; four concurrent exports produce distinct files; preview request generation"
+      ]
+    },
+    "D4": {
+      "status": "pass",
+      "evidence": [
+        "Completed files survive cancellation; retry failures only; previous corrupt config is backed up before replacement"
+      ]
+    },
+    "E1": {
+      "status": "pass",
+      "evidence": [
+        "Serial image jobs; virtual list; render debounce; expired queued previews rejected"
+      ]
+    },
+    "E2": {
+      "status": "pass",
+      "evidence": [
+        "Release benchmark: 24MP tiled watermark output 0.366–1.635s observed; 100 small-file batch completed"
+      ]
+    },
+    "E3": {
+      "status": "partial",
+      "evidence": [
+        "Pixel and encoded input limits; four preview cache files; listeners/timers cleaned; imported-path authorization set retained until app exit"
+      ]
+    },
+    "E4": {
+      "status": "pass",
+      "evidence": [
+        "No network dependencies during image work; local file errors visible and recoverable; build network errors not hidden"
+      ]
+    },
+    "F1": {
+      "status": "pass",
+      "evidence": [
+        "React -> IPC -> desktop coordinator -> independent wmark-core"
+      ]
+    },
+    "F2": {
+      "status": "pass",
+      "evidence": [
+        "One core renderer for preview/export and one batch implementation, native JSON prefs"
+      ]
+    },
+    "F3": {
+      "status": "partial",
+      "evidence": [
+        "Rust files split by responsibility; App.tsx contains substantial workspace JSX and should be split as scope grows"
+      ]
+    },
+    "F4": {
+      "status": "pass",
+      "evidence": [
+        "Core runs independently; api.ts isolates IPC mock in UI tests, actual core integration tested"
+      ]
+    },
+    "F5": {
+      "status": "partial",
+      "evidence": [
+        "TypeScript and clippy no warnings; desktop manifest includes two redundant direct dependencies (base64/image)"
+      ]
+    },
+    "G1": {
+      "status": "pass",
+      "evidence": [
+        "npm test:20; cargo test --workspace:29+5; no skipped tests; production build and clippy passed"
+      ]
+    },
+    "G2": {
+      "status": "pass",
+      "evidence": [
+        "Exact alpha, source unchanged and snapshot retry assertions would fail broken behaviors"
+      ]
+    },
+    "G3": {
+      "status": "pass",
+      "evidence": [
+        "Invalid input, animated images, dimension/file limits, concurrent writes, cancellation and partial failure tests"
+      ]
+    },
+    "G4": {
+      "status": "pass",
+      "evidence": [
+        "Unit/IPC-mock tests distinguished from actual core and Mac end-to-end checks; untested hardware listed"
+      ]
+    },
+    "H1": {
+      "status": "pass",
+      "evidence": [
+        "Mac installed app hash equals final bundle; codesign and DMG integrity pass; CI platform evidence in test report"
+      ]
+    },
+    "H2": {
+      "status": "pass",
+      "evidence": [
+        "Per-file error result and progress; no image contents logged; user filenames only in local UI"
+      ]
+    },
+    "H3": {
+      "status": "pass",
+      "evidence": [
+        "Installer files separate; original data untouched; previous app retained locally; no auto-update or migrations"
+      ]
+    },
+    "H4": {
+      "status": "pass",
+      "evidence": [
+        "Report command evidence, fixed issues, assumptions and remaining validation scope recorded"
+      ]
+    }
+  },
+  "findings": [
+    {
+      "id": "CQ-001",
+      "severity": "low",
+      "status": "open",
+      "dimension": "C",
+      "critical_path": false,
+      "location": "Cargo.lock",
+      "evidence": "Rust advisories not exhaustively scanned; npm production audit is not a Rust security audit.",
+      "impact": "Rust advisories not exhaustively scanned; npm production audit is not a Rust security audit.",
+      "verification": [
+        "static source inspection; required local tests passed"
+      ]
+    },
+    {
+      "id": "CQ-002",
+      "severity": "low",
+      "status": "open",
+      "dimension": "E",
+      "critical_path": false,
+      "location": "src-tauri/src/lib.rs:14",
+      "evidence": "Authorized imported paths remain in memory until process exit; very long import/remove sessions accumulate path strings, not decoded images.",
+      "impact": "Authorized imported paths remain in memory until process exit; very long import/remove sessions accumulate path strings, not decoded images.",
+      "verification": [
+        "static source inspection; required local tests passed"
+      ]
+    },
+    {
+      "id": "CQ-003",
+      "severity": "low",
+      "status": "open",
+      "dimension": "F",
+      "critical_path": false,
+      "location": "src/App.tsx:112",
+      "evidence": "Large workspace component increases maintenance cost; no observed functional failure.",
+      "impact": "Large workspace component increases maintenance cost; no observed functional failure.",
+      "verification": [
+        "static source inspection; required local tests passed"
+      ]
+    },
+    {
+      "id": "CQ-004",
+      "severity": "low",
+      "status": "open",
+      "dimension": "F",
+      "critical_path": false,
+      "location": "src-tauri/Cargo.toml:15",
+      "evidence": "Redundant direct dependencies; no additional runtime data access.",
+      "impact": "Redundant direct dependencies; no additional runtime data access.",
+      "verification": [
+        "static source inspection; required local tests passed"
+      ]
+    }
+  ],
+  "verification_commands": [
+    {
+      "category": "test",
+      "command": "npm test",
+      "exit_code": 0,
+      "required": true
+    },
+    {
+      "category": "test",
+      "command": "cargo test --workspace",
+      "exit_code": 0,
+      "required": true
+    },
+    {
+      "category": "static",
+      "command": "cargo clippy --workspace --all-targets -- -D warnings",
+      "exit_code": 0,
+      "required": true
+    },
+    {
+      "category": "build",
+      "command": "npm run build",
+      "exit_code": 0,
+      "required": true
+    },
+    {
+      "category": "build",
+      "command": "CI=true npm run tauri -- build --bundles app,dmg",
+      "exit_code": 0,
+      "required": true
+    }
+  ],
+  "gate_result": {
+    "result": "PASS",
+    "risk_level": "high",
+    "score": 96.5,
+    "max_score": 100,
+    "minimum_score": 90,
+    "dimensions": {
+      "A": {
+        "name": "需求忠实度与功能保护",
+        "score": 15.0,
+        "max": 15,
+        "minimum": 14,
+        "passed": true
+      },
+      "B": {
+        "name": "逻辑正确性与边界异常",
+        "score": 20.0,
+        "max": 20,
+        "minimum": 18,
+        "passed": true
+      },
+      "C": {
+        "name": "安全、隐私与依赖",
+        "score": 14.0,
+        "max": 15,
+        "minimum": 14,
+        "passed": true
+      },
+      "D": {
+        "name": "数据完整性与并发",
+        "score": 15.0,
+        "max": 15,
+        "minimum": 14,
+        "passed": true
+      },
+      "E": {
+        "name": "性能、资源与韧性",
+        "score": 9.0,
+        "max": 10,
+        "minimum": 9,
+        "passed": true
+      },
+      "F": {
+        "name": "架构与可维护性",
+        "score": 8.5,
+        "max": 10,
+        "minimum": 8,
+        "passed": true
+      },
+      "G": {
+        "name": "测试有效性与回归证据",
+        "score": 10.0,
+        "max": 10,
+        "minimum": 9,
+        "passed": true
+      },
+      "H": {
+        "name": "可运维性与交付就绪",
+        "score": 5.0,
+        "max": 5,
+        "minimum": 4,
+        "passed": true
+      }
+    },
+    "blockers": [],
+    "evidence_gaps": []
+  }
+}

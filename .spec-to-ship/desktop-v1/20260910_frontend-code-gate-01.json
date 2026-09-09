@@ -1,0 +1,169 @@
+{
+  "schema_version": 2,
+  "scope": {
+    "feature": "desktop-v1",
+    "spec_sources": [
+      "docs/implementation-plan.md",
+      "prototype/index.html"
+    ],
+    "code_scope": [
+      "src/",
+      "src-tauri/src/",
+      "crates/wmark-core/"
+    ],
+    "summary": "R01–R08 桌面界面与对应数据链路；发行、签名及 Windows 人工视觉验证单列在完整测试报告。"
+  },
+  "coverage": {
+    "spec_total": 8,
+    "spec_passed": 8,
+    "spec_failed": 0,
+    "spec_unverified": 0
+  },
+  "commands": [
+    {
+      "command": "npm test",
+      "required": true,
+      "exit_code": 0,
+      "evidence": "20 tests passed, no skips"
+    },
+    {
+      "command": "npm run build",
+      "required": true,
+      "exit_code": 0,
+      "evidence": "TypeScript + Vite production build passed"
+    },
+    {
+      "command": "cargo test --workspace",
+      "required": true,
+      "exit_code": 0,
+      "evidence": "29 image/file integration tests + 5 desktop contract tests passed"
+    }
+  ],
+  "checks": [
+    {
+      "id": "FG-001",
+      "gate": "spec_completeness",
+      "title": "R01–R08 界面与数据路径",
+      "result": "pass",
+      "severity": "major",
+      "spec_ids": [
+        "R01",
+        "R02",
+        "R03",
+        "R04",
+        "R05",
+        "R06",
+        "R07",
+        "R08"
+      ],
+      "rationale": "工作台、文件列表、设置、导出弹窗、任务结果、模板管理已连接真实 IPC。",
+      "evidence": [
+        "src/App.tsx:112; tests/App.test.tsx; crates/wmark-core/tests/acceptance.rs"
+      ]
+    },
+    {
+      "id": "FG-002",
+      "gate": "date_time_component",
+      "title": "日期控件",
+      "result": "not_applicable",
+      "severity": "major",
+      "spec_ids": [],
+      "rationale": "无日期时间字段。",
+      "evidence": []
+    },
+    {
+      "id": "FG-003",
+      "gate": "entity_selector",
+      "title": "已有模板与固定枚举选择",
+      "result": "pass",
+      "severity": "major",
+      "spec_ids": [],
+      "rationale": "模板使用稳定 ID 和原生下拉；格式和字体为小型固定枚举。",
+      "evidence": [
+        "src/model.ts; src/App.tsx; tests/App.test.tsx: restored/deleted templates"
+      ]
+    },
+    {
+      "id": "FG-004",
+      "gate": "interaction_wiring",
+      "title": "交互链路",
+      "result": "pass",
+      "severity": "major",
+      "spec_ids": [],
+      "rationale": "原生导入/目录选择/预览/导出真实执行，产物通过 verify_output 逐像素比较。",
+      "evidence": [
+        "src/api.ts; src-tauri/src/lib.rs; screenshots/export-complete.png"
+      ]
+    },
+    {
+      "id": "FG-005",
+      "gate": "workflow_state_completeness",
+      "title": "状态与失败恢复",
+      "result": "pass",
+      "severity": "major",
+      "spec_ids": [],
+      "rationale": "空态、导入中、失败、预览失败、导出中、取消、完成、部分失败和重试均有路径。",
+      "evidence": [
+        "tests/App.test.tsx; crates/wmark-core/tests/acceptance.rs:r07_*"
+      ]
+    },
+    {
+      "id": "FG-006",
+      "gate": "field_contract_consistency",
+      "title": "字段与比例语义",
+      "result": "pass",
+      "severity": "major",
+      "spec_ids": [],
+      "rationale": "共享 camelCase 契约，后端范围校验；JPG 背景/质量、无损 WebP 语义一致；重试保留快照。",
+      "evidence": [
+        "src/model.ts; crates/wmark-core/src/model.rs; tests/App.test.tsx"
+      ]
+    },
+    {
+      "id": "FG-007",
+      "gate": "service_error_handling",
+      "title": "IPC 异常与恢复",
+      "result": "pass",
+      "severity": "major",
+      "spec_ids": [],
+      "rationale": "错误在列表、画布或通知展示；导出错误后可重新操作；坏文件逐个记录。",
+      "evidence": [
+        "tests/App.test.tsx; src-tauri/src/lib.rs:162; crates/wmark-core/src/output.rs:111"
+      ]
+    },
+    {
+      "id": "FG-008",
+      "gate": "scrollable_table_action_column",
+      "title": "横向表格操作列",
+      "result": "not_applicable",
+      "severity": "major",
+      "spec_ids": [],
+      "rationale": "应用没有表格组件；图片集合使用虚拟列表，不含表格能力。",
+      "evidence": []
+    },
+    {
+      "id": "FG-009",
+      "gate": "typography_readability",
+      "title": "实际字体可读性",
+      "result": "pass",
+      "severity": "major",
+      "spec_ids": [],
+      "rationale": "实际 CSS：标题 25/35px、主按钮 14/18.9px、字段 13/19.5px、辅助 12/19.8px。960×700 无横向溢出（scrollWidth=960）；下部设置通过垂直滚动可达。Mac 原生截图检查过，未发现遮挡。开发前没有已安装应用截图，不伪造前后对照。",
+      "evidence": [
+        "screenshots/minimum-viewport.png; screenshots/desktop-workspace.png; screenshots/export-dialog.png; src/style.css"
+      ]
+    }
+  ],
+  "gate_evaluation": {
+    "schema_version": 2,
+    "decision": "PASS",
+    "failures": [],
+    "evidence_gaps": [],
+    "validation_errors": [],
+    "summary": {
+      "required_gate_count": 9,
+      "reviewed_gate_count": 9,
+      "check_count": 9
+    }
+  }
+}

@@ -424,3 +424,62 @@ fn r07_hundred_image_batch_completes() {
     assert_eq!(result.files.len(), 100);
     assert!(result.files.iter().all(|f| f.output.is_some()));
 }
+#[test]
+fn r01_large_encoded_file_rejected_before_reading() {
+    let (dir, _, _) = setup();
+    let path = dir.path().join("huge.png");
+    let file = std::fs::File::create(&path).unwrap();
+    file.set_len(201 * 1024 * 1024).unwrap();
+    assert!(load_image(&path)
+        .unwrap_err()
+        .to_string()
+        .contains("200 MiB"));
+}
+#[test]
+fn r01_unsupported_format_rejected() {
+    let (dir, _, _) = setup();
+    let path = dir.path().join("image.gif");
+    std::fs::write(&path, b"GIF89a\x01\0\x01\0\0\0\0").unwrap();
+    assert!(load_image(&path)
+        .unwrap_err()
+        .to_string()
+        .contains("仅支持"));
+}
+#[test]
+fn r06_concurrent_exports_do_not_clobber() {
+    let (_dir, path, options) = setup();
+    let threads: Vec<_> = (0..4)
+        .map(|_| {
+            let path = path.clone();
+            let options = options.clone();
+            std::thread::spawn(move || {
+                export_one(&path, &spec(), &options, &AtomicBool::new(false)).unwrap()
+            })
+        })
+        .collect();
+    let paths: std::collections::HashSet<_> =
+        threads.into_iter().map(|t| t.join().unwrap()).collect();
+    assert_eq!(paths.len(), 4);
+    assert!(paths.iter().all(|p| p.exists()));
+}
+#[test]
+fn r08_oversized_dimensions_rejected() {
+    let (dir, path, _) = setup();
+    let mut bytes = std::fs::read(path).unwrap();
+    bytes[16..20].copy_from_slice(&8000u32.to_be_bytes());
+    bytes[20..24].copy_from_slice(&6000u32.to_be_bytes());
+    let mut crc = 0xffffffffu32;
+    for b in &bytes[12..29] {
+        crc ^= u32::from(*b);
+        for _ in 0..8 {
+            crc = (crc >> 1) ^ if crc & 1 != 0 { 0xedb88320 } else { 0 };
+        }
+    }
+    bytes[29..33].copy_from_slice(&(!crc).to_be_bytes());
+    let large = dir.path().join("large.png");
+    std::fs::write(&large, bytes).unwrap();
+    assert!(load_image(&large)
+        .unwrap_err()
+        .to_string()
+        .contains("4000 万"));
+}
