@@ -114,9 +114,11 @@ export default function App() {
     [selected, setSelected] = useState<Set<string>>(new Set()),
     [active, setActive] = useState(""),
     [spec, setSpec] = useState<Watermark>(defaultSpec),
-    [templates, setTemplates] = useState<Template[]>([]);
+    [templates, setTemplates] = useState<Template[]>([]),
+    [selectedTemplateId, setSelectedTemplateId] = useState("");
   const [message, setMessage] = useState(""),
-    [importing, setImporting] = useState(false),
+    [noticeDirectory, setNoticeDirectory] = useState("");
+  const [importing, setImporting] = useState(false),
     [preview, setPreview] = useState(""),
     [previewError, setPreviewError] = useState(""),
     [loading, setLoading] = useState(false),
@@ -155,10 +157,29 @@ export default function App() {
     overscan: 6,
     initialRect: { width: 220, height: 400 },
   });
-  const notify = useCallback(
-    (e: unknown) => setMessage(e instanceof Error ? e.message : String(e)),
-    [],
+  const notify = useCallback((e: unknown) => {
+    setNoticeDirectory("");
+    setMessage(e instanceof Error ? e.message : String(e));
+  }, []);
+  useEffect(() => {
+    if (!noticeDirectory || !message) return;
+    const timer = setTimeout(() => {
+      setMessage("");
+      setNoticeDirectory("");
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, [noticeDirectory, message]);
+  const selectedTemplate = templates.find(
+    (t) =>
+      t.id === selectedTemplateId &&
+      (Object.keys(t.spec) as (keyof Watermark)[]).every(
+        (key) => t.spec[key] === spec[key],
+      ),
   );
+  const applyTemplate = (t: Template) => {
+    setSpec({ ...t.spec });
+    setSelectedTemplateId(t.id);
+  };
   const change = <K extends keyof Watermark>(k: K, v: Watermark[K]) =>
     setSpec((s) => ({ ...s, [k]: v }));
   const importPaths = useCallback(
@@ -331,6 +352,8 @@ export default function App() {
     }
     if (busy) return;
     setExportOpen(false);
+    setMessage("");
+    setNoticeDirectory("");
     setBusy(true);
     setCancelRequested(false);
     const id = crypto.randomUUID();
@@ -348,6 +371,7 @@ export default function App() {
           ? "导出已取消，已完成的图片已保留"
           : "导出结束，请查看任务结果",
       );
+      setNoticeDirectory(o.directory);
     } catch (e) {
       setResult(null);
       notify(e);
@@ -691,7 +715,7 @@ export default function App() {
           <div className="presets">
             <span>快捷模板</span>
             {builtinTemplates.map((t) => (
-              <button key={t.id} onClick={() => setSpec({ ...t.spec })}>
+              <button key={t.id} onClick={() => applyTemplate(t)}>
                 {t.name}
               </button>
             ))}
@@ -706,10 +730,11 @@ export default function App() {
                 我的模板
                 <select
                   aria-label="选择已保存模板"
-                  value=""
+                  value={selectedTemplate?.id ?? ""}
+                  className={selectedTemplate ? "selected" : undefined}
                   onChange={(e) => {
                     const t = templates.find((t) => t.id === e.target.value);
-                    if (t) setSpec({ ...t.spec });
+                    if (t) applyTemplate(t);
                   }}
                 >
                   <option value="">选择模板…</option>
@@ -993,6 +1018,19 @@ export default function App() {
       {message && (
         <div className="notification" role="status">
           <span>{message}</span>
+          {noticeDirectory && (
+            <button
+              onClick={() => {
+                const directory = noticeDirectory;
+                setMessage("");
+                setNoticeDirectory("");
+                void api.openOutput(directory).catch(notify);
+              }}
+            >
+              <FolderOpen size={16} />
+              打开目标文件夹
+            </button>
+          )}
           <button aria-label="关闭提示" onClick={() => setMessage("")}>
             <X size={16} />
           </button>
@@ -1145,7 +1183,7 @@ export default function App() {
             <div key={t.id}>
               <button
                 onClick={() => {
-                  setSpec({ ...t.spec });
+                  applyTemplate(t);
                   setTemplateOpen(false);
                 }}
               >

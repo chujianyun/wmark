@@ -141,9 +141,7 @@ aside {
   border-right: 1px solid var(--line);
   display: flex;
   flex-direction: column;
-  max-height: calc(100vh - 108px);
-  position: sticky;
-  top: 0;
+  min-height: 0;
 }
 .eyebrow {
   font-size: 11px;
@@ -185,6 +183,7 @@ input[type="checkbox"] {
 .file-list {
   flex: 1;
   min-height: 180px;
+  flex-basis: 0;
   overflow-y: auto;
 }
 .file {
@@ -276,9 +275,9 @@ main {
   white-space: nowrap;
 }
 .stage {
-  height: calc(100vh - 330px);
-  min-height: 310px;
-  max-height: 680px;
+  height: calc(100vh - 370px);
+  min-height: 280px;
+  max-height: 640px;
   position: relative;
   display: flex;
   align-items: center;
@@ -414,14 +413,14 @@ main {
 .settings {
   background: white;
   border-left: 1px solid var(--line);
-  padding: 25px 20px;
+  padding: 22px 20px;
 }
 .seg {
   display: flex;
   border-radius: 9px;
   background: #f0f3ed;
   padding: 4px;
-  margin-bottom: 22px;
+  margin-bottom: 18px;
   gap: 2px;
 }
 .seg button {
@@ -437,7 +436,7 @@ main {
 }
 .field {
   display: block;
-  margin: 18px 0;
+  margin: 15px 0;
   color: #637467;
   font-size: 13px;
   line-height: 1.5;
@@ -495,7 +494,7 @@ input[type="color"] {
 }
 .line {
   border-top: 1px solid var(--line);
-  margin: 22px 0;
+  margin: 18px 0;
 }
 .switchrow {
   display: flex;
@@ -724,7 +723,7 @@ footer {
     font-size: 23px;
   }
   .stage {
-    height: calc(100vh - 370px);
+    height: calc(100vh - 410px);
   }
   .canvas-info {
     flex-wrap: wrap;
@@ -755,7 +754,7 @@ footer {
     border-top: 1px solid var(--line);
   }
   .stage {
-    height: 420px;
+    height: 380px;
   }
   .file-list {
     min-height: 160px;
@@ -766,4 +765,13 @@ footer {
   .modal {
     padding: 22px;
   }
+}
+
+.saved-templates select.selected {
+  color: var(--green);
+  border-color: #8eb49a;
+  background: #e8f3ea;
+}
+.notification button:hover:not(:disabled) {
+  background: #ffffff20;
 }

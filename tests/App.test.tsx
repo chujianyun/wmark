@@ -277,3 +277,62 @@ it("R05 deletes a saved template and persists removal", async () => {
     ),
   );
 });
+
+it("keeps the saved template selected and clears its highlight after editing", async () => {
+  vi.mocked(api.load).mockResolvedValue({
+    schemaVersion: 1,
+    templates: [
+      {
+        id: "saved",
+        name: "作品署名",
+        spec: { ...defaultSpec, text: "作品署名" },
+      },
+    ],
+    lastSpec: null,
+  });
+  const u = await imported();
+  const select = screen.getByLabelText("选择已保存模板");
+  await u.selectOptions(select, "saved");
+  expect(select).toHaveValue("saved");
+  expect(select).toHaveClass("selected");
+  expect(screen.getByLabelText("水印内容")).toHaveValue("作品署名");
+  await u.type(screen.getByLabelText("水印内容"), "修改");
+  expect(select).toHaveValue("");
+  expect(select).not.toHaveClass("selected");
+});
+
+it("opens the completed export's folder directly from the notification", async () => {
+  vi.mocked(api.openOutput).mockResolvedValue();
+  const u = await imported();
+  await u.click(screen.getByRole("button", { name: "导出图片", exact: true }));
+  await waitFor(() =>
+    expect(screen.getByRole("button", { name: "开始导出" })).toBeEnabled(),
+  );
+  await u.click(screen.getByRole("button", { name: "开始导出" }));
+  await u.click(await screen.findByRole("button", { name: "打开目标文件夹" }));
+  expect(api.openOutput).toHaveBeenCalledWith("/out");
+  expect(
+    screen.queryByText("导出结束，请查看任务结果"),
+  ).not.toBeInTheDocument();
+});
+
+it("dismisses the completion notification after five seconds and retains the job result", async () => {
+  const u = await imported();
+  await u.click(screen.getByRole("button", { name: "导出图片", exact: true }));
+  await waitFor(() =>
+    expect(screen.getByRole("button", { name: "开始导出" })).toBeEnabled(),
+  );
+  await u.click(screen.getByRole("button", { name: "开始导出" }));
+  expect(
+    await screen.findByText("导出结束，请查看任务结果"),
+  ).toBeInTheDocument();
+  await waitFor(
+    () =>
+      expect(
+        screen.queryByText("导出结束，请查看任务结果"),
+      ).not.toBeInTheDocument(),
+    { timeout: 6000 },
+  );
+  expect(screen.getByRole("heading", { name: "导出完成" })).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "打开输出文件夹" })).toBeEnabled();
+}, 8000);
