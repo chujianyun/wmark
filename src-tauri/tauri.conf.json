@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Wmark",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "identifier": "io.github.chujianyun.wmark",
   "build": {
     "beforeDevCommand": "npm run dev",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "Wmark · 水印工作台",
+        "title": "Wmark · 悟鸣水印工作台",
         "width": 1320,
         "height": 900,
         "minWidth": 960,

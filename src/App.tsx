@@ -439,7 +439,7 @@ export default function App() {
         <strong className="wordmark">
           wmark<span>.</span>
         </strong>
-        <span className="header-label">水印工作台</span>
+        <span className="header-label">悟鸣水印工作台</span>
         <div className="header-right">
           <span className="local">
             <ShieldCheck size={16} /> 文件仅在本地处理
