@@ -7,6 +7,7 @@ import { defaultSpec } from "../src/model";
 vi.mock("../src/api", () => ({
   api: {
     load: vi.fn(),
+    fonts: vi.fn(),
     save: vi.fn(),
     chooseImages: vi.fn(),
     importImages: vi.fn(),
@@ -30,6 +31,11 @@ const file = {
 };
 beforeEach(() => {
   vi.resetAllMocks();
+  vi.mocked(api.fonts).mockResolvedValue([
+    "Noto Sans CJK SC",
+    "Arial",
+    "PingFang SC",
+  ]);
   vi.mocked(api.load).mockResolvedValue({
     schemaVersion: 1,
     templates: [],
@@ -336,3 +342,50 @@ it("dismisses the completion notification after five seconds and retains the job
   expect(screen.getByRole("heading", { name: "导出完成" })).toBeInTheDocument();
   expect(screen.getByRole("button", { name: "打开输出文件夹" })).toBeEnabled();
 }, 8000);
+
+it("selects a local font for preview and export independently of bold", async () => {
+  const u = await imported();
+  await screen.findByRole("option", { name: "Arial" });
+  await u.selectOptions(screen.getByLabelText("字体"), "Arial");
+  await u.click(screen.getByLabelText("加粗"));
+  expect(screen.getByLabelText("字体")).toHaveValue("Arial");
+  await waitFor(() =>
+    expect(api.preview).toHaveBeenLastCalledWith(
+      file.path,
+      expect.objectContaining({ fontFamily: "Arial", bold: true }),
+      false,
+      expect.any(Number),
+    ),
+  );
+  await u.click(screen.getByRole("button", { name: "导出图片", exact: true }));
+  await waitFor(() =>
+    expect(screen.getByRole("button", { name: "开始导出" })).toBeEnabled(),
+  );
+  await u.click(screen.getByRole("button", { name: "开始导出" }));
+  expect(api.export).toHaveBeenCalledWith(
+    [file.path],
+    expect.objectContaining({ fontFamily: "Arial", bold: true }),
+    expect.any(Object),
+    expect.any(String),
+  );
+});
+
+it("retains bundled font when local font discovery fails", async () => {
+  vi.mocked(api.fonts).mockRejectedValue(new Error("unavailable"));
+  render(<App />);
+  await screen.findByText("本机字体读取失败，仍可使用内置思源黑体");
+  expect(screen.getByLabelText("字体")).toHaveValue("Noto Sans CJK SC");
+});
+
+it("shows a saved unavailable font with its fallback", async () => {
+  vi.mocked(api.load).mockResolvedValue({
+    schemaVersion: 1,
+    templates: [],
+    lastSpec: { ...defaultSpec, fontFamily: "Missing Font" },
+  });
+  render(<App />);
+  await screen.findByRole("option", {
+    name: "Missing Font（不可用，使用思源黑体）",
+  });
+  expect(screen.getByLabelText("字体")).toHaveValue("Missing Font");
+});

@@ -1,4 +1,4 @@
-use crate::{Error, Result, Watermark};
+use crate::{Error, Result, Watermark, DEFAULT_FONT_FAMILY};
 use base64::{engine::general_purpose::STANDARD, Engine};
 use image::{DynamicImage, ImageDecoder, ImageFormat, ImageReader};
 use resvg::{tiny_skia, usvg};
@@ -15,13 +15,37 @@ fn options() -> &'static usvg::Options<'static> {
         db.load_font_data(
             include_bytes!("../../../assets/fonts/NotoSansCJKsc-Regular.otf").to_vec(),
         );
+        db.load_system_fonts();
         usvg::Options {
-            font_family: "Noto Sans CJK SC".into(),
+            font_family: DEFAULT_FONT_FAMILY.into(),
             fontdb: Arc::new(db),
             ..Default::default()
         }
     })
 }
+/// Families available to the same renderer used by preview and export.
+/// Scan once per process; newly installed fonts appear after restarting the app.
+pub fn font_families() -> Vec<String> {
+    let families: std::collections::BTreeSet<String> = options()
+        .fontdb
+        .faces()
+        .filter_map(|face| face.families.first())
+        .map(|(name, _)| name)
+        .filter(|name| !name.starts_with('.') && !name.trim().is_empty())
+        .filter(|name| name.as_str() != DEFAULT_FONT_FAMILY)
+        .cloned()
+        .collect();
+    std::iter::once(DEFAULT_FONT_FAMILY.to_owned())
+        .chain(families)
+        .collect()
+}
+
+// Quote the family as a CSS string before escaping the surrounding XML attribute.
+fn font_stack(family: &str) -> String {
+    let quoted = family.replace('\\', "\\\\").replace('"', "\\\"");
+    escape(&format!("\"{quoted}\", \"{DEFAULT_FONT_FAMILY}\""))
+}
+
 fn animated(bytes: &[u8], format: ImageFormat) -> bool {
     let mut p = if format == ImageFormat::Png { 8 } else { 12 };
     while p + 8 <= bytes.len() {
@@ -147,7 +171,7 @@ fn stamp(spec: &Watermark, short: f32) -> Result<tiny_skia::Pixmap> {
         let im = im.resize(width, width, image::imageops::FilterType::Lanczos3);
         return tiny_skia::Pixmap::decode_png(&png_bytes(&im)?).map_err(|e| Error(e.to_string()));
     }
-    let svg=format!("<svg xmlns='http://www.w3.org/2000/svg' width='24000' height='400'><text x='10' y='200' font-family='Noto Sans CJK SC' font-size='100' fill='{}' stroke='{}' {}>{}</text></svg>",spec.color,if spec.bold {spec.color.as_str()}else{"none"},if spec.bold {"stroke-width='2' paint-order='stroke' stroke-linejoin='round'"}else{""},escape(&spec.text));
+    let svg=format!("<svg xmlns='http://www.w3.org/2000/svg' width='24000' height='400'><text x='10' y='200' font-family='{}' font-size='100' fill='{}' stroke='{}' {}>{}</text></svg>",font_stack(&spec.font_family),spec.color,if spec.bold {spec.color.as_str()}else{"none"},if spec.bold {"stroke-width='2' paint-order='stroke' stroke-linejoin='round'"}else{""},escape(&spec.text));
     let tree = usvg::Tree::from_str(&svg, options()).map_err(|e| Error(e.to_string()))?;
     let bbox = tree.root().abs_layer_bounding_box();
     let scale = (size / 100.)

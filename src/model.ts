@@ -1,6 +1,7 @@
 export interface Watermark {
   kind: "text" | "logo";
   text: string;
+  fontFamily: string;
   bold: boolean;
   color: string;
   size: number;
@@ -16,6 +17,7 @@ export interface Watermark {
 export const defaultSpec: Watermark = {
   kind: "text",
   text: "© WMARK PHOTOGRAPHY",
+  fontFamily: "Noto Sans CJK SC",
   bold: false,
   color: "#ffffff",
   size: 3,

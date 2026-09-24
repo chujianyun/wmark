@@ -483,3 +483,83 @@ fn r08_oversized_dimensions_rejected() {
         .to_string()
         .contains("4000 万"));
 }
+
+#[test]
+fn font_family_survives_settings_roundtrip() {
+    let mut value = serde_json::to_value(spec()).unwrap();
+    value["fontFamily"] = serde_json::json!("Arial");
+    let restored = serde_json::from_value::<Watermark>(value);
+    assert!(
+        restored.is_ok(),
+        "local font should be accepted in settings"
+    );
+    assert_eq!(
+        serde_json::to_value(restored.unwrap()).unwrap()["fontFamily"],
+        "Arial"
+    );
+}
+
+#[test]
+fn old_settings_default_to_bundled_font() {
+    let mut value = serde_json::to_value(spec()).unwrap();
+    value.as_object_mut().unwrap().remove("fontFamily");
+    let restored: Watermark = serde_json::from_value(value).unwrap();
+    assert_eq!(restored.font_family, "Noto Sans CJK SC");
+}
+
+#[test]
+fn unavailable_font_falls_back_without_interpreting_markup() {
+    let source = image();
+    let expected = render(&source, &spec()).unwrap();
+    for family in ["Wmark Missing Font 12345", "Missing\"'><&\\ Font"] {
+        let actual = render(
+            &source,
+            &Watermark {
+                font_family: family.into(),
+                ..spec()
+            },
+        )
+        .unwrap();
+        assert_eq!(actual.as_bytes(), expected.as_bytes());
+    }
+}
+
+#[cfg(target_os = "macos")]
+#[test]
+fn macos_local_font_changes_pixels_and_matches_export() {
+    let families = imaging::font_families();
+    assert_eq!(families[0], "Noto Sans CJK SC");
+    assert!(families.iter().any(|family| family == "Arial"));
+    let source = image();
+    let local = Watermark {
+        font_family: "Arial".into(),
+        text: "Hello WMARK 123".into(),
+        ..spec()
+    };
+    let bundled = Watermark {
+        font_family: "Noto Sans CJK SC".into(),
+        ..local.clone()
+    };
+    let actual = render(&source, &local).unwrap();
+    assert_ne!(
+        actual.as_bytes(),
+        render(&source, &bundled).unwrap().as_bytes()
+    );
+    let (_dir, path, mut options) = setup();
+    options.format = "png".into();
+    let output = export_one(&path, &local, &options, &AtomicBool::new(false)).unwrap();
+    assert_eq!(actual.as_bytes(), load_image(&output).unwrap().as_bytes());
+
+    let chinese = Watermark {
+        text: "悟鸣中文水印".into(),
+        ..local
+    };
+    let fallback = Watermark {
+        font_family: "Noto Sans CJK SC".into(),
+        ..chinese.clone()
+    };
+    assert_eq!(
+        render(&source, &chinese).unwrap().as_bytes(),
+        render(&source, &fallback).unwrap().as_bytes()
+    );
+}

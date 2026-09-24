@@ -68,6 +68,12 @@ fn authorize_spec(state: &Backend, spec: &Watermark) -> Reply<()> {
     Ok(())
 }
 #[tauri::command]
+async fn list_fonts() -> Reply<Vec<String>> {
+    tauri::async_runtime::spawn_blocking(wmark_core::imaging::font_families)
+        .await
+        .map_err(err)
+}
+#[tauri::command]
 async fn import_images(paths: Vec<PathBuf>, state: State<'_, Backend>) -> Reply<Vec<Imported>> {
     if paths.len() > 1000 {
         return Err("每次最多导入 1000 张图片".into());
@@ -331,6 +337,7 @@ pub fn run() {
             cancel_export,
             open_output,
             default_output,
+            list_fonts,
             load_preferences,
             save_preferences
         ])

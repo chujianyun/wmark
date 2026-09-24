@@ -19,6 +19,8 @@ impl From<std::io::Error> for Error {
 pub struct Watermark {
     pub kind: String,
     pub text: String,
+    #[serde(default = "default_font_family")]
+    pub font_family: String,
     pub bold: bool,
     pub color: String,
     pub size: f32,
@@ -31,11 +33,16 @@ pub struct Watermark {
     pub margin: f32,
     pub logo_path: Option<PathBuf>,
 }
+pub const DEFAULT_FONT_FAMILY: &str = "Noto Sans CJK SC";
+fn default_font_family() -> String {
+    DEFAULT_FONT_FAMILY.into()
+}
 impl Default for Watermark {
     fn default() -> Self {
         Self {
             kind: "text".into(),
             text: "© WMARK PHOTOGRAPHY".into(),
+            font_family: default_font_family(),
             bold: false,
             color: "#ffffff".into(),
             size: 3.,
@@ -64,6 +71,12 @@ impl Watermark {
             if !v.is_finite() || !(min..=max).contains(&v) {
                 return Err(Error(format!("{name}超出允许范围")));
             }
+        }
+        if self.font_family.trim().is_empty()
+            || self.font_family.chars().count() > 256
+            || self.font_family.chars().any(char::is_control)
+        {
+            return Err(Error("字体名称无效".into()));
         }
         parse_color(&self.color)?;
         match self.kind.as_str() {

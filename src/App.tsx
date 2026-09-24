@@ -110,6 +110,8 @@ function Modal({
   );
 }
 export default function App() {
+  const [fonts, setFonts] = useState<string[]>([defaultSpec.fontFamily]);
+  const [fontStatus, setFontStatus] = useState("正在读取本机字体…");
   const [files, setFiles] = useState<Imported[]>([]),
     [selected, setSelected] = useState<Set<string>>(new Set()),
     [active, setActive] = useState(""),
@@ -227,6 +229,17 @@ export default function App() {
   };
   useEffect(() => {
     let disposed = false;
+    api
+      .fonts()
+      .then((families) => {
+        if (!disposed) {
+          setFonts(families);
+          setFontStatus("安装新字体后，重启应用即可使用");
+        }
+      })
+      .catch(() => {
+        if (!disposed) setFontStatus("本机字体读取失败，仍可使用内置思源黑体");
+      });
     api
       .load()
       .then((p) => {
@@ -868,12 +881,31 @@ export default function App() {
               <label className="field">
                 字体
                 <select
-                  value={spec.bold ? "bold" : "regular"}
-                  onChange={(e) => change("bold", e.target.value === "bold")}
+                  value={spec.fontFamily}
+                  onChange={(e) => change("fontFamily", e.target.value)}
                 >
-                  <option value="regular">思源黑体 · 常规</option>
-                  <option value="bold">思源黑体 · 加粗</option>
+                  {!fonts.includes(spec.fontFamily) && (
+                    <option value={spec.fontFamily}>
+                      {spec.fontFamily}（不可用，使用思源黑体）
+                    </option>
+                  )}
+                  {fonts.map((family) => (
+                    <option key={family} value={family}>
+                      {family === defaultSpec.fontFamily
+                        ? "思源黑体（内置）"
+                        : family}
+                    </option>
+                  ))}
                 </select>
+              </label>
+              <p className="help">{fontStatus}</p>
+              <label className="switchrow">
+                加粗
+                <input
+                  type="checkbox"
+                  checked={spec.bold}
+                  onChange={(e) => change("bold", e.target.checked)}
+                />
               </label>
             </>
           ) : (

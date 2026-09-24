@@ -18,6 +18,7 @@ function call<T>(name: string, args?: Record<string, unknown>): Promise<T> {
   return invoke(name, args);
 }
 export const api = {
+  fonts: () => call<string[]>("list_fonts"),
   importImages: (paths: string[]) =>
     call<Imported[]>("import_images", { paths }),
   chooseImages: async () => {
